@@ -1,29 +1,33 @@
 #install.packages("tidyverse")
 #install.packages("janitor")
-
-veh <- read_csv("CO2 Emissions_Canada.csv")
-head(veh)
-
+#install.packages("GGally")
 library(tidyverse)
 library(janitor)
+library(GGally)
 
-veh_clean <- readr::read_csv("CO2 Emissions_Canada.csv", show_col_types = FALSE) %>%
+
+# Exploring the Data
+veh <- read_csv("data/CO2 Emissions_Canada.csv")
+head(veh)
+
+veh_clean <- readr::read_csv("data/CO2 Emissions_Canada.csv", show_col_types = FALSE) %>%
   clean_names() %>%
   transmute(
     make                  = factor(make),
     vehicle_class         = factor(vehicle_class),
     engine_size           = engine_size_l,
     fuel_type             = factor(fuel_type),
-    fuel_consumption = fuel_consumption_comb_l_100_km,
+    fuel_consumption      = fuel_consumption_comb_l_100_km,
     co2_emissions         = co2_emissions_g_km
   ) %>%
   drop_na()
+
+veh_clean
 
 # To sky: I drop the model since there are too many models, and some models are pretty similar, like 335i and 335i xDRIVE.
 # but you can add them by typing model = factor(model),  :)
 # Also drop     fuel_consumption_city = fuel_consumption_city_l_100_km,
 #               fuel_consumption_hwy  = fuel_consumption_hwy_l_100_km,
-#               fuel_consumption_comb_mpg     = fuel_consumption_comb_mpg,
 # Because these variable are highly correlated, especially fuel_consumption_comb_l_100km and fuel_consumption_comb_mpg have 
 # extremely high inverse correlation. I think it's a bed idea to put them in the same model.
 
@@ -31,7 +35,6 @@ glimpse(veh_clean)
 
 
 # Code for create a correlation heat map (numeric-only)
-library(GGally)
 num <- veh_clean %>%
   dplyr::select(co2_emissions, engine_size, fuel_consumption)
 
@@ -66,9 +69,10 @@ eta2_vc <- ss_vc[1] / sum(ss_vc)  # eta-squared (effect size)
 eta2_vc
 
 
+
+
 # 2) FUEL TYPE
 # I noticed there is only one type of car using the N fuel, pretty strange!
-
 veh_clean %>%
   group_by(fuel_type) %>%
   summarise(n = n(),
