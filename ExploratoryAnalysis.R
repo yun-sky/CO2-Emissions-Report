@@ -11,7 +11,7 @@ veh <- read_csv("data/CO2 Emissions_Canada.csv")
 head(veh)
 
 # Only Select explanatory we are interested in, since the other
-# fuel-consumptions are closely related 
+# fuel-consumption are closely related 
 veh_clean <- readr::read_csv("data/CO2 Emissions_Canada.csv", show_col_types = FALSE) %>%
   clean_names() %>%
   transmute(
@@ -37,7 +37,6 @@ num <- veh_clean %>%
 # Correlation Plot
 ggcorr(num, label = TRUE, hjust = 0.9, size = 3)
 
-
 # 1.2 FUEL TYPE
 # I noticed there is only one type of car using the N fuel, pretty strange!
 # So, we remove the one with fuel type equal to N
@@ -57,7 +56,10 @@ ggplot(veh_clean, aes(x = fuel_type, y = co2_emissions)) +
 # VISUALIZATION
 # It appears that both fuel type and fuel consumption effect CO2 emissions
 (ggplot(veh_clean, aes(x = fuel_con, y=co2_emissions, color=fuel_type))
-  + geom_point())
+  + geom_point()
+  + ylab("CO2 Emissions (g/KM)")
+  + xlab("Fuel Consumption (L/KM)")
+  + labs(title="CO2 Emissions vs Fuel Consumption"))
 
 
 # MODEL FITTING: Assessing Linear Terms
@@ -75,8 +77,8 @@ lm_3 <- lm(co2_emissions ~ fuel_type:fuel_con, data=veh_clean)
 model_1_g <- function(base_b0, base_b1) {
   (ggplot(veh_clean, aes(x = fuel_con, y=co2_emissions, color=fuel_type))
     + geom_point()
-    + xlab("Combined Fuel Consumption")
-    + ylab("C02")
+    + xlab("Fuel Consumption (L/100KM)")
+    + ylab("C02 (g/km)")
     + labs(title="Model 1: CO2 vs Fuel Consumption by Fuel Type")
     + geom_abline(intercept = base_b0, 
                   slope=base_b1, 
@@ -91,12 +93,11 @@ model_1_g <- function(base_b0, base_b1) {
                   slope=base_b1 -3.6622,
                   linetype="dashed")) #Z
 }
-
 model_2_g <- function(base_b0, base_b1) {
   (ggplot(veh_clean, aes(x = fuel_con, y=co2_emissions, color=fuel_type))
    + geom_point()
-   + xlab("Combined Fuel Consumption")
-   + ylab("C02")
+   + xlab("Fuel Consumption (L/100KM)")
+   + ylab("C02 (g/km)")
    + labs(title="Model 2: CO2 vs Fuel Consumption by Fuel Type")
    + geom_abline(intercept = base_b0, 
                  slope=base_b1, 
@@ -111,7 +112,6 @@ model_2_g <- function(base_b0, base_b1) {
                  slope=base_b1,
                  linetype="dashed")) #Z
 }
-
 model_3_g <- function(base_b0) {
   (ggplot(veh_clean, aes(x = fuel_con, y=co2_emissions, color=fuel_type))
    + geom_point()
@@ -144,15 +144,3 @@ summary(lm_2)
 summary(lm_3)
 
 
-
-#reg <- regsubsets(co2_emissions ~ fuel_type + fuel_con + fuel_type*fuel_con, data=veh_clean)
-#cp <- summary(reg)$cp[4:7]
-#p <- 5:8
-#cp_vs_p <- cbind(cp, p)
-
-#(ggplot(data=cp_vs_p, aes(y=cp, x=p)) 
-#  + geom_point()
-#  + geom_abline(intercept=0, slope=1, color="red")
-#  + xlab("# of Parameters")
-#  + ylab("Mallows Cp")
-#  + labs(title="Mallows Cp vs # of Parameters"))
